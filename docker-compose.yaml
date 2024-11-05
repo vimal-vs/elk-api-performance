@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  monthly-task:
+    build: .
+    container_name: elk_api_performance
+    environment:
+      - TZ=UTC
+    volumes:
+      - ./script.py:/app/script.py
+      - ./config.py:/app/config.py
+    entrypoint: ["cron", "-f"]
