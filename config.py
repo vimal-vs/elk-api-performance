@@ -6,7 +6,7 @@ load_dotenv()
 
 def get_current_month_range():
     today = datetime.today()
-    first_day_of_current_month = today.replace(day=1)
+    first_day_of_current_month = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     start_date = first_day_of_current_month.isoformat() + "Z"
     end_date = today.isoformat() + "Z"
     
@@ -35,6 +35,13 @@ elk_username = os.getenv('ELK_USERNAME')
 elk_password = os.getenv('ELK_PASSWORD')
 smtp_sender = os.getenv('SMTP_USERNAME')
 smtp_password = os.getenv('SMTP_PASSWORD')
+
+recipients = [
+    "abhijit.bhadoria@bajajfinserv.in",
+    "aniket.hazra@bajajfinserv.in",
+    "tushar.sharma4@bajajfinserv.in",
+    "vimal.sakkthi@bajajfinserv.in"
+]
 
 body = {
     "size": 0,
