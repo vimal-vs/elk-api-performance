@@ -5,37 +5,45 @@ import pandas as pd
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.mime.application import MIMEApplication
 
 ROUND_OFFSET = 3
 
 def send_email(file):
-    recipients = [
-        ""
-    ]
+    recipients = config.recipients
     
-    subject = f"ELK API Performance | {config.month}"
-    body = file
+    subject = f"ELK API Performance Analysis Report | {config.month}"
+    body = (
+    f"Hello Team,\n\n"
+    f"We are pleased to inform you that the comprehensive performance analysis report of the APIs from ELK "
+    f"for the month of {config.month} has been successfully generated.\n\n"
+    f"This report provides valuable insights into the API performance metrics, allowing us to track trends, identify any issues, "
+    f"and make data-driven decisions to enhance our system's efficiency.\n\n"
+    f"The detailed report has been attached to this email for your review.\n\n"
+    f"\n\nPlease note: This is an automated email sent to the team members. For any queries or feedback, please contact the appropriate team member directly.\n\n"
+    )
 
     msg = MIMEMultipart()
     msg['From'] = config.smtp_sender
     msg['Subject'] = subject
     msg.attach(MIMEText(body, 'plain'))
 
-    with open(file, 'rb') as file:
-        msg.attach(MIMEText(file.read(), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'))
-        msg.add_header('Content-Disposition', f'attachment; filename={file}')
+    file_path = file
 
-    for recipient in recipients:
-        msg['To'] = recipient
-        msg.attach(MIMEText(body, 'plain'))
-        try:
-            with smtplib.SMTP('smtp.gmail.com', 587) as server:
-                server.starttls()
-                server.login(config.smtp_sender, config.smtp_password)
-                server.send_message(msg)
-                print("Email sent successfully!")
-        except Exception as e:
-            print(f"Failed to send email: {e}")
+    with open(file_path, 'rb') as f:
+        part = MIMEApplication(f.read(), _subtype="vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        part.add_header('Content-Disposition', 'attachment', filename=file)
+        msg.attach(part)
+
+    msg['To'] = ', '.join(recipients)
+
+    try:
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+            server.login(config.smtp_sender, config.smtp_password)
+            server.send_message(msg)
+            print("Email sent successfully!")
+    except Exception as e:
+        print(f"Failed to send email: {e}")
 
 def fetch_data(url, username, password, body):
     print("\n\nFetching Data...")
@@ -193,7 +201,7 @@ def save_to_excel_with_formatting(dataframe, file_name):
 
     writer._save()
     print("\n\nData saved in | " + file_name + " |\n")
-    # send_email(file_name)
+    send_email(file_name)
 
 def main():
     print("\n" + "-"*50)
